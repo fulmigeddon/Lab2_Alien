@@ -17,11 +17,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
 public class AlienController {
-	
-	private String pattern1 = "(^([a-zA-Z]+)$)";
-	private String pattern2 = "(^([a-zA-Z]+)([ ]{1})([a-zA-Z]+)$)";
 
-	private AlienDictionary dizionario;
+	private AlienDictionary dizionario = new AlienDictionary();
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -29,66 +26,58 @@ public class AlienController {
 	@FXML // URL location of the FXML file that was given to the FXMLLoader
 	private URL location;
 
-	@FXML // fx:id="txtInsert"
-	private TextField txtInsert; // Value injected by FXMLLoader
+	@FXML // fx:id="txtFind"
+	private TextField txtFind; // Value injected by FXMLLoader
 
-	@FXML // fx:id="btnTranslate"
-	private Button btnTranslate; // Value injected by FXMLLoader
+	@FXML // fx:id="txtTranslate"
+	private TextField txtTranslate; // Value injected by FXMLLoader
 
-	@FXML // fx:id="txtresults"
+	@FXML // fx:id="btnFind"
+	private Button btnFind; // Value injected by FXMLLoader
+
+	@FXML // fx:id="txtResults"
 	private TextArea txtResults; // Value injected by FXMLLoader
 
 	@FXML // fx:id="btnClear"
-	private Button btnClear; // Value injected by FXMLLoader+*
+	private Button btnClear; // Value injected by FXMLLoader
 
 	@FXML
 	void doClear(ActionEvent event) {
-		txtResults.setText("");
+		txtResults.clear();
 	}
 
 	@FXML
 	void doTranslate(ActionEvent event) {
 		txtResults.setText("");
-		String testo = txtInsert.getText();
-		if (testo.matches(pattern1 + "||" + pattern2) && !testo.isEmpty())
-			if (testo.matches(pattern1))
-				txtResults.appendText(dizionario.translateWord(testo));
-			else {
-				String[] parolaTraduzione = testo.split(" ");
-				txtResults.appendText(dizionario.addWord(parolaTraduzione[0], parolaTraduzione[1]));
-			}
-		else {
-			txtInsert.setStyle("-fx-border-color:red;-fx-text-inner-color:red;-fx-background-insets: 0,0,0,0;");
-			txtResults.appendText(
-					"Il testo inserito non rispetta nessuna dei seguenti pattern:\n- <parola> \n- <parola> <traduzione>");
-		}
+		if (!txtFind.getText().isEmpty())
+			if (txtTranslate.getText().isEmpty())
+				txtResults.appendText(dizionario.translateWord(txtFind.getText()));
+			else
+				txtResults.appendText(dizionario.addWord(txtFind.getText(), txtTranslate.getText()));
 	}
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
-		assert txtInsert != null : "fx:id=\"txtInsert\" was not injected: check your FXML file 'AlienView.fxml'.";
-		assert btnTranslate != null : "fx:id=\"btnTranslate\" was not injected: check your FXML file 'AlienView.fxml'.";
-		assert txtResults != null : "fx:id=\"txtresults\" was not injected: check your FXML file 'AlienView.fxml'.";
+		assert txtFind != null : "fx:id=\"txtInsert\" was not injected: check your FXML file 'AlienView.fxml'.";
+		assert txtTranslate != null : "fx:id=\"btnTranslate\" was not injected: check your FXML file 'AlienView.fxml'.";
+		assert btnFind != null : "fx:id=\"btnFind\" was not injected: check your FXML file 'AlienView.fxml'.";
+		assert txtResults != null : "fx:id=\"txtResults\" was not injected: check your FXML file 'AlienView.fxml'.";
 		assert btnClear != null : "fx:id=\"btnClear\" was not injected: check your FXML file 'AlienView.fxml'.";
-		txtInsert.setStyle("-fx-border-color:black;-fx-text-inner-color:black;-fx-background-insets: 1,1,1,1;");
-		txtInsert.setOnKeyTyped(new EventHandler<KeyEvent>() {
+
+		txtFind.setOnKeyTyped(new EventHandler<KeyEvent>() {
 
 			@Override
 			public void handle(KeyEvent arg0) {
-				txtResults.setText("");
-				String testo = txtInsert.getText();
-				if (testo.matches(pattern1 + "||" + pattern2) || testo.isEmpty()) {
-					txtInsert.setStyle(
-							"-fx-border-color:black;-fx-text-inner-color:black;-fx-background-insets: 1,1,1,1;");
-					btnTranslate.setDisable(false);
-					if (arg0.getCharacter().hashCode() == 13)
-						doTranslate(new ActionEvent());
-				} else {
-					txtInsert.setStyle("-fx-border-color:red;-fx-text-inner-color:red;-fx-background-insets: 0,0,0,0;");
-					btnTranslate.setDisable(true);
-					txtResults.appendText(
-							"Il testo inserito non rispetta nessuna dei seguenti pattern:\n- <parola> \n- <parola> <traduzione>");
-				}
+				if (arg0.getCharacter().hashCode() == 13)
+					txtTranslate.requestFocus();
+			}
+		});
+		txtTranslate.setOnKeyTyped(new EventHandler<KeyEvent>() {
+
+			@Override
+			public void handle(KeyEvent arg0) {
+				if (arg0.getCharacter().hashCode() == 13)
+					doTranslate(new ActionEvent());
 			}
 		});
 	}
@@ -96,5 +85,4 @@ public class AlienController {
 	public void setDizionario(AlienDictionary dizionario) {
 		this.dizionario = dizionario;
 	}
-
 }
